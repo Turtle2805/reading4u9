@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ms Lê Hằng English - IELTS Reading Master Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Quicksand:wght500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Nunito', 'Quicksand', sans-serif;
+            background: linear-gradient(-45deg, #FFF0F5, #FFE4E1, #FFF5EE, #FFDEE9, #F4F6FB);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .bg-pattern-stars {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath d='M9 10L11 6L13 10L17 11L13 13L14 17L10 14L6 17L8 13L4 11L9 10Z' fill='%23ffb6c1' fill-opacity='0.25'/%3E%3Ccircle cx='40' cy='40' r='3' fill='%238854C0' fill-opacity='0.15'/%3E%3C/svg%3E");
+        }
+
+        /* 3D Elastic Gamified Buttons shadow styling */
+        .btn-3d {
+            position: relative;
+            border-bottom: 4px solid rgba(0, 0, 0, 0.15);
+            transition: all 0.1s ease;
+        }
+        .btn-3d:active {
+            transform: translateY(2px);
+            border-bottom-width: 2px;
+        }
+
+        .split-viewport-pane {
+            height: calc(100vh - 165px);
+        }
+
+        .custom-scroll-bar::-webkit-scrollbar {
+            width: 7px;
+        }
+        .custom-scroll-bar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 10px;
+        }
+        .custom-scroll-bar::-webkit-scrollbar-thumb {
+            background: #E2D9F3;
+            border-radius: 10px;
+        }
+        .custom-scroll-bar::-webkit-scrollbar-thumb:hover {
+            background: #FFB6C1;
+        }
+
+        /* Continuous text drag highlight applied as a light pink pastel block instantly */
+        ::selection {
+            background-color: rgba(255, 182, 193, 0.8);
+            color: #000;
+        }
+
+        /* Smooth target locator pulse effect */
+        .flash-target-evidence {
+            animation: pulseFlash 3.5s ease-in-out;
+            border-radius: 10px;
+        }
+        @keyframes pulseFlash {
+            0% { background-color: rgba(255, 105, 180, 0.4); box-shadow: 0 0 15px rgba(255, 105, 180, 0.5); }
+            50% { background-color: rgba(255, 182, 193, 0.6); box-shadow: 0 0 25px rgba(255, 182, 193, 0.7); }
+            100% { background-color: transparent; box-shadow: none; }
+        }
+
+        .pop-correct-node {
+            animation: popUi 0.3s ease;
+        }
+        @keyframes popUi {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="bg-pattern-stars min-h-screen flex flex-col overflow-hidden text-gray-800 antialiased">
+
+    <canvas id="canvas-fireworks" class="pointer-events-none fixed inset-0 w-full h-full z-50"></canvas>
+
+    <header class="bg-white px-6 py-2 shadow-sm border-b-2 border-gray-100 flex flex-wrap items-center justify-between z-40">
+        <div>
+            <span class="text-[11px] font-bold text-gray-400 tracking-wide block">MS LÊ HẰNG ENGLISH</span>
+            <h1 class="text-xl font-black text-purple-950 tracking-tight -mt-1">IELTS READING & VOCABULARY MOCK TEST</h1>
+        </div>
+
+        <div class="flex items-center gap-3 my-1 md:my-0">
+            <div class="bg-purple-50 border-2 border-purple-200 text-purple-700 px-4 py-1 rounded-full font-black text-base flex items-center gap-1.5 shadow-inner">
+                <i class="fa-regular fa-clock text-lg animate-pulse"></i>
+                <span id="lbl-countdown-string">30:00</span>
+            </div>
+            <button id="btn-timer-trigger" class="bg-amber-400 text-purple-950 font-black px-5 py-2 rounded-xl btn-3d hover:bg-amber-300 text-xs uppercase tracking-wider">
+                BẮT ĐẦU TÍNH GIỜ LÀM BÀI
+            </button>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <div class="bg-emerald-50 border-2 border-emerald-200 text-emerald-700 font-extrabold px-3 py-1 rounded-xl text-xs flex items-center gap-1">
+                <i class="fa-solid fa-square-poll-vertical text-base"></i> ĐIỂM SỐ: <span id="lbl-master-score-badge" class="font-black text-sm text-emerald-900">0</span> / <span id="lbl-total-questions-count">94</span>
+            </div>
+        </div>
+    </header>
+
+    <nav class="bg-white/90 backdrop-blur-md px-4 py-1.5 flex gap-2 border-b border-gray-200 overflow-x-auto custom-scroll-bar z-30">
+        <button id="tab-anchor-1" onclick="activateDashboardTab(1)" class="whitespace-nowrap px-4 py-2 rounded-xl font-black text-xs transition-all flex items-center gap-1.5 border-2 bg-purple-600 text-white border-purple-700 shadow-sm">
+            <i class="fa-solid fa-bullhorn text-amber-300"></i> Exercise 13 & 14 (Part 1)
+        </button>
+        <button id="tab-anchor-2" onclick="activateDashboardTab(2)" class="whitespace-nowrap px-4 py-2 rounded-xl font-black text-xs transition-all flex items-center gap-1.5 border-2 bg-white text-gray-600 border-gray-200 hover:bg-gray-50">
+            <i class="fa-solid fa-tea text-emerald-500"></i> Exercise 14 (Part 2)
+        </button>
+        <button id="tab-anchor-3" onclick="activateDashboardTab(3)" class="whitespace-nowrap px-4 py-2 rounded-xl font-black text-xs transition-all flex items-center gap-1.5 border-2 bg-white text-gray-600 border-gray-200 hover:bg-gray-50">
+            <i class="fa-solid fa-map-location-dot text-pink-500"></i> Exercise 15 (Passages Reading)
+        </button>
+        <button id="tab-anchor-4" onclick="activateDashboardTab(4)" class="whitespace-nowrap px-4 py-2 rounded-xl font-black text-xs transition-all flex items-center gap-1.5 border-2 bg-white text-gray-600 border-gray-200 hover:bg-gray-50">
+            <i class="fa-solid fa-dumbbell text-blue-500"></i> Exercise 16 & 17 (Teen Life)
+        </button>
+        <button id="tab-anchor-5" onclick="activateDashboardTab(5)" class="whitespace-nowrap px-4 py-2 rounded-xl font-black text-xs transition-all flex items-center gap-1.5 border-2 bg-white text-gray-600 border-gray-200 hover:bg-gray-50">
+            <i class="fa-solid fa-graduation-cap text-orange-500"></i> Exercise 18 (Robert & Britain)
+        </button>
+        <button id="tab-anchor-6" onclick="activateDashboardTab(6)" class="whitespace-nowrap px-4 py-2 rounded-xl font-black text-xs transition-all flex items-center gap-1.5 border-2 bg-white text-gray-600 border-gray-200 hover:bg-gray-50">
+            <i class="fa-solid fa-brain text-rose-500"></i> Exercise 19 & 20 (Time & Eating)
+        </button>
+    </nav>
+
+    <main class="flex-grow flex flex-col md:flex-row split-viewport-pane p-4 gap-4">
+        
+        <section class="w-full md:w-1/2 bg-white rounded-2xl shadow-md border border-gray-200 p-5 flex flex-col overflow-hidden">
+            <div id="lbl-passage-master-title" class="text-base font-black text-purple-950 pb-2 border-b border-gray-100 flex items-center gap-2 mb-3">
+                </div>
+            <div id="viewport-left-paragraphs" class="flex-grow overflow-y-auto custom-scroll-bar pr-1 space-y-5">
+                </div>
+        </section>
+
+        <section class="w-full md:w-1/2 bg-white rounded-2xl shadow-md border border-gray-200 p-5 flex flex-col overflow-hidden relative">
+            <div class="mb-3 flex justify-between items-center bg-gray-50 p-2 rounded-xl border border-gray-100">
+                <span class="text-xs font-black text-purple-950">Interactive Answer Sheet</span>
+                <span id="lbl-tab-completion-ratio" class="text-[11px] font-black text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md">Progress: 0%</span>
+            </div>
+
+            <div id="viewport-right-questions" class="flex-grow overflow-y-auto custom-scroll-bar pr-1 space-y-5 pb-20">
+                </div>
+
+            <div class="absolute bottom-4 right-4 z-20">
+                <button id="btn-submit-exam-trigger" class="bg-gradient-to-r from-rose-500 to-red-600 text-white font-black px-6 py-3 rounded-full text-xs uppercase tracking-widest shadow-lg border-b-4 border-red-800 hover:from-rose-400 hover:to-red-500 btn-3d flex items-center gap-2">
+                    NỘP BÀI KIỂM TRA <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <div id="modal-evaluator-desk" class="hidden fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl border-4 border-purple-200 shadow-2xl max-w-lg w-full p-6 text-center relative pop-correct-node">
+            <h3 class="text-xl font-black text-purple-950 uppercase tracking-wide">BẢNG ĐIỂM TỔNG KẾT CHI TIẾT</h3>
+            <p class="text-xs font-bold text-gray-400 mt-0.5 uppercase">Ms Lê Hằng English Academic Testing Center</p>
+
+            <div class="my-4 bg-purple-50 border-2 border-purple-100 rounded-2xl p-4 inline-block">
+                <span id="lbl-modal-score-ratio" class="text-4xl font-black text-purple-700">0 / 0</span>
+                <p class="text-[10px] font-black text-purple-500 tracking-wider uppercase mt-1">Câu trả lời đúng</p>
+            </div>
+
+            <p id="lbl-modal-feedback-string" class="text-sm font-bold text-gray-700 bg-gray-50 border-l-4 border-purple-500 p-3 rounded-r-xl text-left italic">
+                Processing results metrics...
+            </p>
+
+            <div class="flex gap-2 mt-5">
+                <button onclick="toggleModalVisibilityState(false)" class="flex-1 bg-gray-500 text-white font-black py-2.5 rounded-xl text-xs uppercase btn-3d border-b-4 border-gray-700">Xem lại lỗi sai</button>
+                <button onclick="clearAndResetMockExam()" class="flex-1 bg-purple-600 text-white font-black py-2.5 rounded-xl text-xs uppercase btn-3d border-b-4 border-purple-800">Làm lại từ đầu</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const masterExamDataset = {
+            1: {
+                title: "⏳ Exercise 13: Notices, Closures & Eiffel Tower Icons",
+                heading: "Official Announcements & Ad Texts",
+                paragraphs: [
+                    {
+                        id: "t1-p1",
+                        text: "<b>Notice: School Closure</b><br>Dear Parents,<br>We are writing to inform you that (1) ______ our school will be temporarily closed due to a recent increase in COVID-19 cases. We understand that this is sudden, but the health and safety of our students and staff is our top (2) ______.",
+                        translation: "<b>Thông báo: Đóng cửa trường học</b><br>Kính gửi phụ huynh,<br>Chúng tôi viết thư này để thông báo với quý vị rằng trường học của chúng ta sẽ tạm thời đóng cửa do số ca nhiễm COVID-19 gia tăng gần đây. Chúng tôi hiểu rằng điều này là đột ngột, nhưng sức khỏe và sự an toàn của học sinh và nhân viên là ưu tiên hàng đầu của chúng tôi."
+                    },
+                    {
+                        id: "t1-p2",
+                        text: "Online classes will begin on May 24, 2025. Please (3) ______ sure your child is prepared for online learning. We will continue to monitor the situation and will provide updates on when we can safely reopen the school. In the meantime, please encourage your child to follow health guidelines such as washing hands frequently and wearing a mask. Thank you for your understanding and (4) ______ during this challenging time.<br>Sincerely,<br>School Administration",
+                        translation: "Các lớp học trực tuyến sẽ bắt đầu vào ngày 24/5/2025. Vui lòng đảm bảo con bạn đã sẵn sàng học trực tuyến. Chúng tôi tiếp tục theo dõi và cung cấp cập nhật lịch mở lại trường an toàn."
+                    },
+                    {
+                        id: "t1-p3",
+                        text: "<b>Discover the Eiffel Tower: An Icon's Story</b><br>Have you ever wondered how the Eiffel Tower became (1) ______ symbol of Paris?<br>This fascinating book takes you back in time to the (2) ______ of this incredible monument. Learn about the challenges faced by its creators, the controversies surrounding its design, and how it became one (3) ______ the most visited attractions in the world.<br>Filled with beautiful pictures and interesting facts, 'The Story of the Eiffel Tower' is perfect for anyone (4) ______ loves history, architecture, or simply wants to know more about this iconic landmark. Get your copy today and be inspired by the story behind the Eiffel Tower!",
+                        translation: "<b>Khám phá Tháp Eiffel: Câu chuyện biểu tượng</b><br>Có bao giờ bạn tự hỏi tháp Eiffel trở thành một biểu tượng của Paris như thế nào? Cuốn sách này đưa bạn ngược dòng thời gian về quá trình xây dựng công trình vĩ đại, những thử thách và tranh cãi thiết kế để trở thành điểm tham quan đông khách bậc nhất thế giới."
+                    }
+                ],
+                glossary: [
+                    { word: "Temporarily", pos: "adv", meaning: "Tạm thời, ngắn hạn", synonym: "Momentarily, briefly" },
+                    { word: "Priority", pos: "n", meaning: "Sự ưu tiên hàng đầu", synonym: "Top concern" },
+                    { word: "Monument", pos: "n", meaning: "Công trình đài kỷ niệm lớn", synonym: "Landmark" }
+                ],
+                questions: [
+                    { id: "e13-1", index: "1", text: "Notice Q1: inform you that (1) ______ our school will be temporarily closed...", type: "mcq", options: ["a", "the", "an", "no article"], correct: "no article", explanation: "Trước cụm danh từ đã có sẵn tính từ sở hữu 'our school' thì không đi kèm mạo từ đứng chen giữa.", targetPara: "t1-p1" },
+                    { id: "e13-2", index: "2", text: "Notice Q2: the health and safety of our students and staff is our top (2) ______.", type: "mcq", options: ["anniversary", "priority", "castle", "ingredient"], correct: "priority", explanation: "Cụm danh từ ghép 'top priority' mang ý nghĩa là ưu tiên hàng đầu, hoàn toàn khớp ngữ cảnh bảo vệ an toàn học đường.", targetPara: "t1-p1" },
+                    { id: "e13-3", index: "3", text: "Notice Q3: Please (3) ______ sure your child is prepared for online learning.", type: "mcq", options: ["make", "take", "look", "catch"], correct: "make", explanation: "Cấu trúc collocation quen thuộc cố định: 'make sure' nghĩa là đảm bảo, chắc chắn điều gì.", targetPara: "t1-p2" },
+                    { id: "e13-4", index: "4", text: "Notice Q4: Thank you for your understanding and (4) ______ during this challenging time.", type: "mcq", options: ["cooperative", "cooperatively", "cooperation", "cooperate"], correct: "cooperation", explanation: "Đứng sau tính từ sở hữu 'your' và liên từ song hành 'and' liên kết với danh từ 'understanding' ta cần điền danh từ: 'cooperation'.", targetPara: "t1-p2" },
+                    { id: "e13-5", index: "5", text: "Eiffel Q1: Have you ever wondered how the Eiffel Tower became (1) ______ symbol of Paris?", type: "mcq", options: ["the", "an", "no article", "a"], correct: "a", explanation: "Sử dụng mạo từ bất định 'a' đứng trước danh từ đếm được số ít biểu thị một biểu tượng mang tính khái quát.", targetPara: "t1-p3" },
+                    { id: "e13-6", index: "6", text: "Eiffel Q2: This fascinating book takes you back in time to the (2) ______ of this incredible monument.", type: "mcq", options: ["destructive", "constructor", "construction", "construct"], correct: "construction", explanation: "Đứng sau mạo từ 'the' và trước giới từ 'of' bắt buộc cần danh từ chỉ hành động/sự vật: 'construction' (quá trình xây dựng).", targetPara: "t1-p3" },
+                    { id: "e13-7", index: "7", text: "Eiffel Q3: Learn about the challenges faced by its creators... and how it became one (3) ______ the most visited attractions...", type: "mcq", options: ["at", "to", "for", "of"], correct: "of", explanation: "Cấu trúc ngữ pháp so sánh tập hợp: 'one of + danh từ số nhiều' (một trong số những...).", targetPara: "t1-p3" },
+                    { id: "e13-8", index: "8", text: "Eiffel Q4: perfect for anyone (4) ______ loves history, architecture...", type: "mcq", options: ["why", "whom", "which", "who"], correct: "who", explanation: "Đại từ quan hệ 'who' đóng vai trò làm chủ ngữ thay thế cho đại từ bất định chỉ người 'anyone'.", targetPara: "t1-p3" }
+                ]
+            },
+            2: {
+                title: "🌿 Exercise 14: Historical Lifestyles, Agriculture & Tea Rituals",
+                heading: "Exercise 14 Cloze Passages Complete Text",
+                paragraphs: [
+                    {
+                        id: "t2-p1",
+                        text: "<b>❶ Life in the Past:</b> A long time ago, in aspects such as means of (1) ______ transportation, fashion, eating habits, entertainment, and education, the ways people lived were quite different from the ways which we live nowadays. In the old days, oral communication was commonly used between people. Knowledge, information, news, and experience were transferred face-to-face. At the end of the 19th century and the early 20th century, telegrams were used to transmit communication to people from far away. Years ago, people used to travel (2) ______ foot. For long distances, they travelled by riding animals, such as camels, buffaloes, and horses. They also used animal-pulled carts. They (3) ______ in simple ways. Most of their clothes were made of linen and leather. They went barefoot or wore shoes made of leather. Some might wear (4) ______ slippers. Their eating habits and diets were plain with fresh, healthy and natural food which they got from nature. Storytelling was the (5) ______ popular kind of entertainment in the past. Stories were mostly folk tales, fairy tales, and fables. Children did not have much to play with. They played outdoor games, such as kite-flying, and hide and seek. Their toys were hand-made. For education, there weren't computers and the Internet, so students had to drown themselves in dozens of books and notebooks. Teachers would write lessons and homework down on chalkboards for students to copy and (6) ______. Papers were hand-written and submitted to teachers.",
+                        translation: "<b>❶ Đời sống xưa kia:</b> Ngày xưa, phương tiện truyền thông thông tin, thời trang ăn uống rất khác biệt. Con người đi bộ (on foot), ăn mặc giản dị (dressed up), đi guốc gỗ (wooden slippers) và kể chuyện là loại hình giải trí phổ biến nhất (most popular). Giáo viên chép bài lên bảng phấn cho học sinh sao chép và hoàn thành (complete)."
+                    },
+                    {
+                        id: "t2-p2",
+                        text: "<b>❷ Agricultural Developments:</b> Before the Stone Age, people (1) ______ to eat fruits, leaves, and anything they found in the forest. (2) ______, this habit changed into hunting animals, preserving food items, and planting and (3) ______ vegetables, which eventually led to farming different crops like maize, corn, and rice. People were healthy, they rarely had diseases and never needed extra exercise because their daily work kept their bodies (4) ______.<br>At present, we (5) ______ agriculture into a mass-scale production, including machinery, technology, and pesticides, all of which came in with the green revolution. With the green revolution agriculture and the traditional farming culture turned upside down. Nowadays, farmers who can cope up with multinational cooperation and their large-scale, expensive products, keep producing crops for the market. However, traditional, low-income farmers even today, especially in Asian countries, are in a terrible state. Fast food is another major factor in modern food habits. Although many people find it convenient, it leads (6) ______ many health conditions. Today, people are unhealthy. They need medicine, and function on diets and exercise machines.",
+                        translation: "<b>❷ Tiến trình Nông nghiệp:</b> Trước thời đồ đá, con người thường ăn (used to eat) hoa quả rừng. Tuy nhiên (However), thói quen này đổi thành săn bắt và trồng trọt rau màu (growing), giữ cơ thể chuyển động vận động (moving). Hiện nay nông nghiệp chuyển thành sản xuất đại trà (have turned) và thức ăn nhanh dẫn đến (leads to) nhiều bệnh tật lý tính nguy hiểm."
+                    },
+                    {
+                        id: "t2-p3",
+                        text: "<b>❸ Unique Tea Culture:</b> Tea has been an essential drink and a very unique culture of Vietnamese people for thousands of years. At family (1) ______, meetings, and celebrations, tea and its rituals represent hospitality, (2) ______ for the elderly, and peaceful nature. (3) ______ drinking tea in Viet Nam is considered a daily habit of the elderly in households and in society. In the morning, people start a new day with (4) ______ cups of tea to refresh their minds. Drinking tea after meals, especially dinner, is also a habit when all family members can gather and talk (5) ______ what they have done during the day. In cities, people usually drink tea from small shops everywhere, (6) ______ in front of the gate of bus terminals, train stations, schools, office buildings, pavements or in quiet alleys. Tea served with ice, lemon and sugar become an interesting modern trend of Vietnamese street culture for youngsters.",
+                        translation: "<b>❸ Văn hóa Trà Việt:</b> Tại các buổi đoàn tụ sum họp gia đình (reunions), trà đại diện lòng hiếu khách và sự kính trọng (respect) người lớn tuổi. Theo truyền thống (Traditionally), mọi người uống trà sáng hoặc sau bữa tối quây quần trò chuyện về (talk about) công việc trong ngày, từ quán vỉa hè nhỏ (such as) đến trà chanh của giới trẻ."
+                    }
+                ],
+                glossary: [
+                    { word: "Communication", pos: "n", meaning: "Sự thông tin liên lạc, giao tiếp", synonym: "Interaction" },
+                    { word: "Traditionally", pos: "adv", meaning: "Theo truyền thống lâu đời", synonym: "Conventionally" },
+                    { word: "Mass-scale", pos: "adj", meaning: "Quy mô công nghiệp đại chúng", synonym: "Large-scale" }
+                ],
+                questions: [
+                    { id: "e14a-1", index: "1", text: "❶ Q1: aspects such as means of (1) ______ transportation...", type: "mcq", options: ["communicate", "communication", "communicates", "communicating"], correct: "communication", explanation: "Cụm từ ghép cố định 'means of communication' nghĩa là phương tiện thông tin liên lạc.", targetPara: "t2-p1" },
+                    { id: "e14a-2", index: "2", text: "❶ Q2: Years ago, people used to travel (2) ______ foot.", type: "mcq", options: ["on", "to", "by", "for"], correct: "on", explanation: "Giới từ cố định đi kèm trạng thái đi bộ bằng chân: 'on foot'.", targetPara: "t2-p1" },
+                    { id: "e14a-3", index: "3", text: "❶ Q3: They (3) ______ in simple ways. Most of their clothes were...", type: "mcq", options: ["hand down", "break out", "pass down", "dressed up"], correct: "dressed up", explanation: "Cụm động từ phrasal verb 'dress up' nghĩa là diện đồ, ăn mặc phục trang lên người.", targetPara: "t2-p1" },
+                    { id: "e14a-4", index: "4", text: "❶ Q4: Some might wear (4) ______ slippers.", type: "mcq", options: ["plastic", "metal", "wooden", "fabric"], correct: "wooden", explanation: "Hợp ngữ cảnh lịch sử xa xưa: 'wooden slippers' nghĩa là guốc gỗ mộc mạc.", targetPara: "t2-p1" },
+                    { id: "e14a-5", index: "5", text: "❶ Q5: Storytelling was the (5) ______ popular kind of entertainment...", type: "mcq", options: ["most", "more", "as", "further"], correct: "most", explanation: "Cấu trúc so sánh nhất đi với tính từ dài: 'the most popular' (phổ biến nhất).", targetPara: "t2-p1" },
+                    { id: "e14a-6", index: "6", text: "❶ Q6: lesson down on chalkboards for students to copy and (6) ______.", type: "mcq", options: ["finish", "conclude", "terminate", "complete"], correct: "complete", explanation: "Hoàn thành trọn vẹn nhiệm vụ học tập bài tập về nhà: dùng 'complete'.", targetPara: "t2-p1" },
+                    { id: "e14b-1", index: "7", text: "❷ Q1: Before the Stone Age, people (1) ______ to eat fruits...", type: "mcq", options: ["used", "use", "is used", "to used"], correct: "used", explanation: "Cấu trúc 'used to + V' chỉ thói quen/hành động lặp đi lặp lại trong quá khứ nay không còn.", targetPara: "t2-p2" },
+                    { id: "e14b-2", index: "8", text: "❷ Q2: (2) ______, this habit changed into hunting animals...", type: "mcq", options: ["In spite", "However", "Although", "Despite"], correct: "Hyperlink", correct: "However", explanation: "Trạng từ liên kết tương phản đứng đầu câu ngăn cách bằng dấu phẩy: 'However' (Tuy nhiên).", targetPara: "t2-p2" },
+                    { id: "e14b-3", index: "9", text: "❷ Q3: preserving food items, and planting and (3) ______ vegetables...", type: "mcq", options: ["developing", "improving", "rising", "growing"], correct: "growing", explanation: "Cụm từ collocation quen thuộc: 'growing vegetables' nghĩa là trồng trọt, canh tác rau củ.", targetPara: "t2-p2" },
+                    { id: "e14b-4", index: "10", text: "❷ Q4: because their daily work kept their bodies (4) ______.", type: "mcq", options: ["running", "working", "moving", "jogging"], correct: "moving", explanation: "Cấu trúc 'keep something/someone moving' nghĩa là giữ cho cơ thể luôn vận động hoạt bát.", targetPara: "t2-p2" },
+                    { id: "e14b-5", index: "11", text: "❷ Q5: At present, we (5) ______ agriculture into a mass-scale production...", type: "mcq", options: ["have turned", "turns", "turned", "were turning"], correct: "have turned", explanation: "Trạng ngữ 'At present' đi cùng hành động đổi mới có kết quả kéo dài tới nay ta chia Hiện tại hoàn thành.", targetPara: "t2-p2" },
+                    { id: "e14b-6", index: "12", text: "❷ Q6: Although many people find it convenient, it leads (6) ______ many health conditions.", type: "mcq", options: ["for", "to", "of", "on"], correct: "to", explanation: "Động từ cố định đi kèm giới từ: 'lead to' (dẫn đến hệ quả, biến cố gì).", targetPara: "t2-p2" },
+                    { id: "e14c-1", index: "13", text: "❸ Q1: At family (1) ______, meetings, and celebrations...", type: "mcq", options: ["reunions", "assemblies", "events", "shows"], correct: "reunions", explanation: "Cụm từ danh từ ghép thông dụng 'family reunions' nghĩa là những cuộc đoàn tụ, sum họp gia đình.", targetPara: "t2-p3" },
+                    { id: "e14c-2", index: "14", text: "❸ Q2: represent hospitality, (2) ______ for the elderly, and peaceful nature.", type: "mcq", options: ["notice", "recognition", "respect", "value"], correct: "respect", explanation: "Danh từ 'respect for someone' biểu thị lòng tôn kính, kính trọng đối với ai đó.", targetPara: "t2-p3" },
+                    { id: "e14c-3", index: "15", text: "❸ Q3: (3) ______ drinking tea in Viet Nam is considered a daily habit...", type: "mcq", options: ["Tradition", "Traditional", "Traditionally", "Traditionalist"], correct: "Traditionally", explanation: "Trạng từ 'Traditionally' đứng đầu câu trước dấu phẩy đóng vai trò trạng ngữ bổ nghĩa cho toàn mệnh đề.", targetPara: "t2-p3" },
+                    { id: "e14c-4", index: "16", text: "❸ Q4: people start a new day with (4) ______ cups of tea to refresh...", type: "mcq", options: ["much", "some", "a few", "few"], correct: "some", explanation: "Sử dụng 'some' phù hợp câu khẳng định đi kèm danh từ số nhiều biểu thị một lượng vài chén trà.", targetPara: "t2-p3" },
+                    { id: "e14c-5", index: "17", text: "❸ Q5: gather and talk (5) ______ what they have done during the day.", type: "mcq", options: ["for", "to", "at", "about"], correct: "about", explanation: "Cấu trúc động từ đi kèm giới từ quy định bắt buộc: 'talk about something' (nói chuyện về điều gì).", targetPara: "t2-p3" },
+                    { id: "e14c-6", index: "18", text: "❸ Q6: small shops everywhere, (6) ______ in front of the gate of bus terminals...", type: "mcq", options: ["such as", "so that", "such that", "so"], correct: "such as", explanation: "Cụm liên từ 'such as' dùng để mở đầu chuỗi liệt kê các ví dụ minh họa vị trí địa lý cụ thể.", targetPara: "t2-p3" }
+                ]
+            },
+            3: {
+                title: "🏛️ Exercise 15: Passages - Hanoi Old Quarter, Tet & Fine Traditions",
+                heading: "Exercise 15 Reading Comprehension Materials",
+                paragraphs: [
+                    {
+                        id: "t3-p1",
+                        text: "<b>Passage 1: Ha Noi's Old Quarter</b> была основана hundreds of years ago on the east side of the ancient Thang Long citadel. In the old days, the Old Quarter, a system of narrow streets, alleys and houses, was home to several guilds such as bronze casting, forging, jewelry making, wood carving, silk and clothes trading. Small, beautifully styled houses built along with a unique local culture. Streets in the Old Quarter still have names describing their original goods or craft, for example, Hang Bac or 'Silver Street'. The ground-floor shops of the houses here now sell handicrafts, fine arts, and food. But the quarter also has a number of pagodas, temples, historical relics, and festivals dedicated to the founders of some of the local crafts. Now, many guild streets, like Hang Quat street, don't make fans anymore, but they are remembered as craft streets. The architecture and lifestyle of the local people reflect typical characteristics of traditional guild streets in Ha Noi.",
+                        translation: "<b>Đoạn 1: Phố cổ Hà Nội</b> hình thành hàng trăm năm trước ở phía đông thành cổ Thăng Long. Đây là cái nôi chứa đựng nhiều phường nghề (guilds) thủ công truyền thống: Hàng Bạc, Hàng Quạt phản ánh sâu sắc nếp sống bản địa."
+                    },
+                    {
+                        id: "t3-p2",
+                        text: "<b>Passage 2: Preserving Traditions</b> Vietnamese traditions are well preserved and passed down through generations thanks to the Vietnamese people's love for their country. They have a long history of fighting against foreign invaders, such as China and France. This has made them very protective of their culture and traditions.<br>One of the most important traditions is Tet, the Lunar New Year. It takes place in January or February. The whole country stops working for a week to celebrate. People visit their families and give each other lucky money in red envelopes. They also clean their houses to get rid of bad luck from the old year. There are many delicious foods to eat at Tet, such as 'banh chung', which is sticky rice with pork inside, wrapped in 'dong' leaves.<br>Another important tradition is ancestor worship. Vietnamese people believe that when someone dies, their soul lives on and can protect the family. They have an altar in their house where they put pictures of their ancestors. Every day, they light incense and offer food and drink to their ancestors. During Tet, they invite their ancestors ' spirits to join the celebrations.",
+                        translation: "<b>Đoạn 2: Giữ gìn bản sắc</b> Nhờ lòng yêu nước và lịch sử chống giặc ngoại xâm (invaders), người Việt bảo tồn truyền thống bền bỉ. Tết Nguyên Đán nghỉ việc một tuần, dọn nhà xua xui xẻo, ăn bánh chưng và thờ cúng tổ tiên tôn kính."
+                    },
+                    {
+                        id: "t3-p3",
+                        text: "<b>Passage 3: Ancestor Worship Fine Ritual</b> Ancestor worship is a ritual practice showing respect to deceased family members that reminds people of their roots. Most Vietnamese families have an ancestral altar at a prominent place of the house. The ancestral altar is set with ancestral tablets and pictures, together with an incense container. Two candles are placed on the sides of the altar to represent the Sun on the left and the Moon on the right.<br>During the Lunar New Year festival, the Vietnamese at home and abroad carefully cook traditional dishes to put on the home altar to worship their ancestors. Children are obliged to respect their parents in life and to remember them after they die. On special occasions like ancestors' death anniversaries or the Lunar New Year. Special rites consist of making offerings of fruits, foods and wine, lighting the candles and burning incense before praying in front of the altar. Tet is an occasion for people to invite the souls of their ancestors to join the family's Tet celebration. The altar may also be decorated with a branch of peach blossoms in warm pink to drive away evil spirits and bad luck.",
+                        translation: "<b>Đoạn 3: Tục thờ kính cội nguồn</b> Đặt bàn thờ ở vị trí trang trọng nổi bật nhất giữa nhà (prominent place). Đôi nến đặt hai bên đại diện Nhật - Nguyệt. Cành hoa đào hồng ấm áp xua đuổi tà ma và xui xẻo."
+                    }
+                ],
+                glossary: [
+                    { word: "Guilds", pos: "n", meaning: "Phường hội, đoàn thể thợ thủ công", synonym: "Associations" },
+                    { word: "Invaders", pos: "n", meaning: "Quân xâm lược, kẻ đi chiếm đất", synonym: "Conquerors" },
+                    { word: "Prominent", pos: "adj", meaning: "Nổi bật, dễ thấy nhất ở trung tâm", synonym: "Easily seen" }
+                ],
+                questions: [
+                    { id: "e15-1", index: "1", text: "P1 Q1: What is the main idea of the passage 1?", type: "mcq", options: ["The historical significance of the Thang Long citadel", "The transformation of Hanoi's Old Quarter from a craft center to a tourist destination", "The architectural styles of houses in Hanoi's Old Quarter", "The cultural and historical richness of Hanoi's Old Quarter, particularly its connection to traditional crafts"], correct: "The cultural and historical richness of Hanoi's Old Quarter, particularly its connection to traditional crafts", explanation: "Văn bản tập trung ca ngợi bề dày lịch sử và kho tàng văn hóa gắn liền làng nghề của Phố Cổ Hà Nội.", targetPara: "t3-p1" },
+                    { id: "e15-2", index: "2", text: "P1 Q2: The word 'guilds' in line 2 is closest in meaning to __________", type: "mcq", options: ["associations", "families", "companies", "neighborhoods"], correct: "associations", explanation: "Guilds có nghĩa là phường hội nghiệp đoàn nghề nghiệp = associations (hiệp hội).", targetPara: "t3-p1" },
+                    { id: "e15-3", index: "3", text: "P1 Q3: According to the passage, which of the following sentences is TRUE?", type: "mcq", options: ["The Old Quarter is located on the west side of the Thang Long citadel.", "Streets in the Old Quarter are named after famous people.", "The Old Quarter no longer has any connection to its craft-making past", "The architecture and lifestyle of the people in the Old Quarter reflect its history as a center for craft guilds"], correct: "The architecture and lifestyle of the people in the Old Quarter reflect its history as a center for craft guilds", explanation: "Dẫn chứng câu kết đoạn 1: 'The architecture and lifestyle of the local people reflect typical characteristics of traditional guild streets'.", targetPara: "t3-p1" },
+                    { id: "e15-4", index: "4", text: "P1 Q4: What can visitors find in the ground-floor shops of the houses in the Old Quarter today?", type: "mcq", options: ["Only traditional crafts", "Modern electronics", "Handicrafts, fine arts, and food", "Exclusively clothing and textiles"], correct: "Handicrafts, fine arts, and food", explanation: "Dẫn chứng văn bản: 'The ground-floor shops of the houses here now sell handicrafts, fine arts, and food.'", targetPara: "t3-p1" },
+                    { id: "e15-5", index: "5", text: "P1 Q5: What is the significance of Hang Quat street today?", type: "mcq", options: ["It is a major center for fan-making", "It is known for its modern architecture", "It is remembered as a craft street, even though it no longer produces fans", "It is a popular tourist destination for its nightlife"], correct: "It is remembered as a craft street, even though it no longer produces fans", explanation: "Dẫn chứng: 'Now, many guild streets, like Hang Quat street, don't make fans anymore, but they are remembered as craft streets.'", targetPara: "t3-p1" },
+                    { id: "e15-6", index: "6", text: "P2 Q1: What can be the best title for the passage 2?", type: "mcq", options: ["Vietnamese Cuisine", "Tet Celebration in Vietnam", "Vietnamese History", "Preserving Vietnamese Traditions"], correct: "Preserving Vietnamese Traditions", explanation: "Tiêu đề bao quát ý thức, hành động gìn giữ phát huy bản sắc văn hóa cội nguồn dân tộc Việt Nam.", targetPara: "t3-p2" },
+                    { id: "e15-7", index: "7", text: "P2 Q2: What does the word 'invaders' in the passage mostly mean?", type: "mcq", options: ["Tourists", "Conquerors", "Immigrants", "Visitors"], correct: "Conquerors", explanation: "Invaders nghĩa là quân xâm lấn lãnh thổ = Conquerors (kẻ chinh phạt, đánh chiếm).", targetPara: "t3-p2" },
+                    { id: "e15-8", index: "8", text: "P2 Q3: Which of the following is NOT true according to the passage 2?", type: "mcq", options: ["Vietnamese people clean their houses during Tet to get rid of bad luck.", "Ancestor worship is an important tradition in Vietnam", "Banh chung is a traditional Vietnamese food eaten during Tet.", "Vietnamese people celebrate Tet for a month."], correct: "Vietnamese people celebrate Tet for a month.", explanation: "Thông tin sai vì bài đọc ghi 'stops working for a week to celebrate' - nghỉ ăn Tết 1 tuần chứ không phải 1 tháng.", targetPara: "t3-p2" },
+                    { id: "e15-9", index: "9", text: "P2 Q4: According to the passage 2, why are Vietnamese traditions well preserved?", type: "mcq", options: ["Because of the influence of foreign cultures", "Because of the Vietnamese people's love for their country and their history of fighting against foreign invaders", "Because of the delicious food eaten during Tet", "Because of the beautiful decorations used during Tet"], correct: "Because of the Vietnamese people's love for their country and their history of fighting against foreign invaders", explanation: "Dẫn chứng dòng đầu đoạn 2: 'thanks to the Vietnamese people's love for their country. They have a long history of fighting against foreign invaders...'", targetPara: "t3-p2" },
+                    { id: "e15-10", index: "10", text: "P2 Q5: How do Vietnamese people show respect to their ancestors?", type: "mcq", options: ["By cleaning their houses during Tet", "By giving each other lucky money in red envelopes", "By having an altar in their house, offering food and drink, and inviting their ancestors' spirits to join celebrations.", "By eating 'banh chung' during Tet"], correct: "By having an altar in their house, offering food and drink, and inviting their ancestors' spirits to join celebrations.", explanation: "Tổng hợp toàn bộ nội dung chi tiết được phân tích tỉ mỉ ở nửa sau đoạn văn số 2 về phong tục thờ kính tổ tiên.", targetPara: "t3-p2" },
+                    { id: "e15-11", index: "11", text: "P3 Q1: Ancestor worship is followed by many people in Viet Nam ________.", type: "mcq", options: ["to celebrate the Tet festivals", "to maintain the relationships in the family", "to show respect to their ancestors", "to decorate their ancestral altar"], correct: "to show respect to their ancestors", explanation: "Dẫn chứng câu mở đầu: 'Ancestor worship is a ritual practice showing respect to deceased family members...'", targetPara: "t3-p3" },
+                    { id: "e15-12", index: "12", text: "P3 Q2: All of the following items can be found on the altar EXCEPT ________.", type: "mcq", options: ["a dish of food every day", "ancestral tablets and pictures", "an incense container", "two candles placed on the sides of the altar"], correct: "a dish of food every day", explanation: "Văn bản chỉ ghi dâng cúng thức ăn đồ lễ vào dịp giỗ chạp hoặc lễ Tết đặc biệt, không khẳng định bắt buộc ngày nào cũng có mâm cơm.", targetPara: "t3-p3" },
+                    { id: "e15-13", index: "13", text: "P3 Q3: Children are expected to ________.", type: "mcq", options: ["offer their parents a lot of food", "celebrate their ancestors' death anniversaries on the Lunar New Year", "respect their parents in life and afterlife", "cook traditional dishes to worship their ancestors whenever they can"], correct: "respect their parents in life and afterlife", explanation: "Dẫn chứng câu văn: 'Children are obliged to respect their parents in life and to remember them after they die.'", targetPara: "t3-p3" },
+                    { id: "e15-14", index: "14", text: "P3 Q4: A branch of peach blossoms in warm pink is believed to ________.", type: "mcq", options: ["show respect for all the past, the present day, and the future", "bring good luck to the family", "to celebrate Tet", "maintain the country's culture"], correct: "bring good luck to the family", explanation: "Hoa đào giúp xua đuổi tà ma vận hạn đen đủi ('drive away evil spirits and bad luck'), tương đồng đem lại cát tường may mắn.", targetPara: "t3-p3" },
+                    { id: "e15-15", index: "15", text: "P3 Q5: The word 'prominent' in paragraph 1 is closest in meaning to ________.", type: "mcq", options: ["easily seen", "common", "clean", "pleasant"], correct: "easily seen", explanation: "Prominent nghĩa là vị trí trung tâm nổi bật bắt mắt = easily seen (dễ dàng nhìn thấy ngay).", targetPara: "t3-p3" }
+                ]
+            },
+            4: {
+                title: "🌸 Exercise 16 & 17: Get Fit Guides & Study-Life Balance",
+                heading: "Teens Fitness Advertisements & Time Management Text",
+                paragraphs: [
+                    {
+                        id: "t4-p1",
+                        text: "<b>❶ Teens! Get Fit and Feel Great!</b> Want to be healthier and have more energy? Our special guide is just for teens! Learn how to (1)_______ good choices and feel awesome every day.<br>What's Inside:<br>1. Get Moving: If you exercise regularly, you'll get (2)_______ and feel better.<br>2. Eat Right: You should follow our (3)_______ tips to eat healthy foods and avoid junk food.<br>3. Feel Happy: Learn (4)______ to relax and stay positive.",
+                        translation: "Học cách đưa ra lựa chọn (make choices), tập thể dục sẽ khỏe mạnh hơn (stronger), không dùng mạo từ đứng giữa tính sở hữu (no article), học cách thư giãn (how to relax)."
+                    },
+                    {
+                        id: "t4-p2",
+                        text: "<b>❷ Get More Energy, Feel Amazing!</b> Feeling tired lately? No problem! Our plan will help you feel great again. When you follow our simple advice, you'll have more (1)_______ and focus. Eat plenty (2)______ fruits, vegetables. A healthy diet is really (3)______. Sign up now and discover (4)_______ happier, healthier you!",
+                        translation: "Có nhiều năng lượng (energy), ăn nhiều hoa quả (plenty of), chế độ ăn thực sự quan trọng (really important), khám phá phiên bản mới của chính mình (a happier, healthier you)."
+                    },
+                    {
+                        id: "t4-p3",
+                        text: "<b>❸ Exercise 17 Passage:</b> It's not easy to manage school and life, but with some good time (1)_______ techniques, it's possible to achieve a study-life balance. Firstly, (2)_____ a schedule. Plan your week in advance, allocating specific times. You (3)_____ also include breaks. Secondly, learn to prioritise. You should focus (4)_____ those tasks first. Thirdly, take (5)_____ of any free time during the day. Finally, don't be too hard on yourself. Consider (6)_____ to a teacher for support.",
+                        translation: "Kỹ thuật quản lý thời gian (time management), lên lịch trình (make a schedule), bạn nên dành thời gian nghỉ (should), tập trung vào việc đó (focus on), tận dụng thời gian rảnh (take advantage of), cân nhắc việc nói chuyện bàn bạc (consider talking)."
+                    },
+                    {
+                        id: "t4-p4",
+                        text: "<b>❹ Teenagers in a Competitive World:</b> Teenagers today live in a very competitive world. It is more important than ever to succeed at school if you hope to (1)______ a chance in the job market afterwards. It’s no wonder that many young people worry (2)_______ letting down their parents. The result is that young people (3)_______ from stress. Caffeine is a drug which (4)______ become addictive. Physical exercise is a good release for stress, (5)_____ it increases certain chemicals. You have to stay healthy and full of (6)______.",
+                        translation: "Hy vọng có cơ hội (have a chance), lo lắng về việc làm thất vọng (worry about), chịu đựng áp lực căng thẳng (suffer from), caffeine có thể gây nghiện (can), giải tỏa áp lực vì nó làm tăng chất hóa học (because), tràn trề sinh lực năng lượng (full of energy)."
+                    }
+                ],
+                glossary: [
+                    { word: "Regularly", pos: "adv", meaning: "Đều đặn, thường xuyên", synonym: "Frequently" },
+                    { word: "Overwhelmed", pos: "adj", meaning: "Bị quá tải, ngập tràn áp lực", synonym: "Stressed" },
+                    { word: "Addictive", pos: "adj", meaning: "Có tính gây nghiện", synonym: "Habit-forming" }
+                ],
+                questions: [
+                    { id: "e16a-1", index: "1", text: "❶ Q1: Learn how to (1)_______ good choices and feel awesome...", type: "mcq", options: ["make", "take", "do", "look"], correct: "make", explanation: "Cụm cấu trúc cố định Collocation: 'make choices' nghĩa là đưa ra lựa chọn.", targetPara: "t4-p1" },
+                    { id: "e16a-2", index: "2", text: "❶ Q2: If you exercise regularly, you'll get (2)_______ and feel better.", type: "mcq", options: ["strongly", "strengthen", "strength", "stronger"], correct: "stronger", explanation: "Cấu trúc song hành bổ nghĩa đi sau động từ liên kết 'get' + tính từ so sánh hơn: 'stronger'.", targetPara: "t4-p1" },
+                    { id: "e16a-3", index: "3", text: "❶ Q3: You should follow our (3)_______ tips to eat healthy foods...", type: "mcq", options: ["no article", "a", "the", "an"], correct: "no article", explanation: "Không chèn mạo từ chen vào giữa tính từ sở hữu 'our' và danh từ số nhiều 'tips'.", targetPara: "t4-p1" },
+                    { id: "e16a-4", index: "4", text: "❶ Q4: Feel Happy: Learn (4)______ to relax and stay positive.", type: "mcq", options: ["why", "where", "what", "how"], correct: "how", explanation: "Cấu trúc từ nghi vấn phương thức: 'learn how + to-V' (học cách thức làm việc gì).", targetPara: "t4-p1" },
+                    { id: "e16b-1", index: "5", text: "❷ Q1: When you follow our simple advice, you'll have more (1)_______ and focus.", type: "mcq", options: ["energy", "balance", "priority", "distraction"], correct: "energy", explanation: "Hợp nghĩa đồng nhất tiêu đề văn bản 'Get More Energy'.", targetPara: "t4-p2" },
+                    { id: "e16b-2", index: "6", text: "❷ Q2: Eat plenty (2)______ fruits, vegetables, and good foods.", type: "mcq", options: ["about", "to", "of", "with"], correct: "of", explanation: "Lượng từ chỉ độ nhiều phong phú cố định: 'plenty of' (rất nhiều cái gì).", targetPara: "t4-p2" },
+                    { id: "e16b-3", index: "7", text: "❷ Q3: A healthy diet is really (3)______.", type: "mcq", options: ["importances", "importantly", "important", "importance"], correct: "important", explanation: "Sau trạng từ chỉ mức độ 'really' và động từ tobe 'is' ta cần điền một tính từ bổ ngữ: 'important'.", targetPara: "t4-p2" },
+                    { id: "e16b-4", index: "8", text: "❷ Q4: Sign up now and discover (4)_______ happier, healthier you!", type: "mcq", options: ["the", "an", "no article", "a"], correct: "a", explanation: "Cấu trúc tu từ đặc biệt diễn tả một phiên bản mới tốt đẹp hơn: 'a + tính từ + you'.", targetPara: "t4-p2" },
+                    { id: "e17a-1", index: "9", text: "❸ Q1: but with some good time (1)_______ techniques, it's possible...", type: "mcq", options: ["limitation", "period", "management", "awareness"], correct: "management", explanation: "Cụm danh từ ghép vô cùng phổ biến: 'time management' (quản lý quỹ thời gian).", targetPara: "t4-p3" },
+                    { id: "e17a-2", index: "10", text: "❸ Q2: Firstly, (2)_____ a schedule. Plan your week in advance...", type: "mcq", options: ["give", "hold", "work", "make"], correct: "make", explanation: "Collocation hành động: 'make a schedule' mang nghĩa lập ra thời khóa biểu lịch trình cụ thể.", targetPara: "t4-p3" },
+                    { id: "e17a-3", index: "11", text: "❸ Q3: You (3)_____ also include breaks and time for relaxation...", type: "mcq", options: ["should", "mustn’t", "ought not to", "may"], correct: "should", explanation: "Sử dụng trợ động từ tình thái 'should' nhằm đưa ra lời khuyên hữu ích mang tính xây dựng.", targetPara: "t4-p3" },
+                    { id: "e17a-4", index: "12", text: "❸ Q4: identify the most important tasks and focus (4)_____ those first.", type: "mcq", options: ["to", "on", "with", "of"], correct: "on", explanation: "Cấu trúc giới từ đi kèm động từ bắt buộc: 'focus on something' (tập trung vào điều gì).", targetPara: "t4-p3" },
+                    { id: "e17a-5", index: "13", text: "❸ Q5: Thirdly, take (5)_____ of any free time during the day.", type: "mcq", options: ["responsibility", "action", "advantage", "moment"], correct: "advantage", explanation: "Thành ngữ cố định: 'take advantage of' mang ý nghĩa tận dụng tối đa lợi thế từ cái gì.", targetPara: "t4-p3" },
+                    { id: "e17a-6", index: "14", text: "❸ Q6: In these situations, you can consider (6)_____ to a teacher...", type: "mcq", options: ["talking", "to talking", "talked", "to be talked"], correct: "talking", explanation: "Quy tắc ngữ pháp: Động từ 'consider' bắt buộc đi kèm danh động từ dạng V-ing đứng sau ('consider + V-ing').", targetPara: "t4-p3" },
+                    { id: "e17b-1", index: "15", text: "❹ Q1: if you hope to (1)______ a chance in the job market afterwards.", type: "mcq", options: ["wonder", "have", "doing", "take on"], correct: "have", explanation: "Cụm cụm từ: 'have a chance' = có cơ hội đạt được mục tiêu.", targetPara: "t4-p4" },
+                    { id: "e17b-2", index: "16", text: "❹ Q2: It’s no wonder that many young people worry (2)_______ letting down their parents...", type: "mcq", options: ["of", "at", "about", "with"], correct: "about", explanation: "Cấu trúc tính từ/động từ cố định: 'worry about something/someone' (lo lắng bồn chồn về việc gì).", targetPara: "t4-p4" },
+                    { id: "e17b-3", index: "17", text: "❹ Q3: The result is that young people (3)_______ from stress.", type: "mcq", options: ["suffer", "please", "balance", "cope with"], correct: "suffer", explanation: "Động từ đi kèm giới từ cố định: 'suffer from' (hứng chịu, gánh chịu tác hại tiêu cực từ căn bệnh/áp lực).", targetPara: "t4-p4" },
+                    { id: "e17b-4", index: "18", text: "❹ Q4: But caffeine is a drug which (4)______ become addictive.", type: "mcq", options: ["can’t", "mustn’t", "have to", "can"], correct: "can", explanation: "Sử dụng 'can' biểu đạt tính khả năng khách quan có thể xảy ra hệ quả trong đời sống thực tế.", targetPara: "t4-p4" },
+                    { id: "e17b-5", index: "19", text: "❹ Q5: physical exercise is a good release for stress, (5)_____ it increases certain chemicals...", type: "mcq", options: ["although", "unless", "because", "because of"], correct: "because", explanation: "Sau chỗ trống là một mệnh đề hoàn chỉnh (S + V) đóng vai trò nguyên nhân, do đó sử dụng liên từ 'because'.", targetPara: "t4-p4" },
+                    { id: "e17b-6", index: "20", text: "❹ Q6: get enough sleep to avoid stress and to stay healthy and full of (6)______.", type: "mcq", options: ["obstacle", "effort", "assignment", "energy"], correct: "energy", explanation: "Thành ngữ cố định: 'full of energy' biểu đạt tình trạng tràn trề sức sống, đầy dồi dào sinh lực.", targetPara: "t4-p4" }
+                ]
+            },
+            5: {
+                title: "🇬🇧 Exercise 18: Robert's Neighborhood & British Teenagers Life",
+                heading: "Exercise 18 Reading Passages Data Grid",
+                paragraphs: [
+                    {
+                        id: "t5-p1",
+                        text: "<b>❶ Robert's Apartment Lifestyle:</b> My name is Robert. I live in an apartment. My apartment is on the twelfth floor. There is a supermarket on the first floor in our building. My mother and I often buy food, drinks and household items in the supermarket because of its convenience. Sometimes, I buy some bread and milk for breakfast when I go to school. There is a park near my building. In the afternoons, I often play soccer with my friends in the park to improve our health. There is also a big restaurant with plenty of delicious dishes in my neighbourhood and my family usually has dinner at the restaurant on Saturday evenings. After dinner, if I want to see a film, I can go to the cinema which is not far from my building. It is interesting to live in a city like our city.",
+                        translation: "Căn hộ chung cư của Robert nằm ở tầng 12, tầng 1 có siêu thị tiện lợi. Chiều chơi đá bóng ở công viên cạnh nhà, tối thứ Bảy cả nhà ăn tiệm nhà hàng lớn rồi đi xem phim rạp rất tiện."
+                    },
+                    {
+                        id: "t5-p2",
+                        text: "<b>❷ WHAT IS IT LIKE BEING A TEENAGER IN BRITAIN?</b><br><b>School:</b> British teenagers spend most of their time at school. Students in Britain can leave school at sixteen (grade 11). This is also the age when most students take their first important exams, the GCSE (General Certificate of Secondary Education). Most teens take between 5-10 subjects, which means a lot of studying. They are spending more time on homework than teenagers ever before. Forget watching TV, teenagers in Britain now spend 2-3 hours on homework after school.<br><b>School uniform:</b> Visit almost any school in Britain and the first thing you’ll notice is the school uniform. Although school uniform has its advantages, when they are 15 or 16 most teenagers are tired of wearing it. When there is more than one school in a town, school uniforms can highlight differences between schools. In London there are many cases of bullying and fighting between pupils from different schools.<br><b>Clothes and looks:</b> In Britain, some teens judge you by the shirt or trainers you are wearing, as 40% of British teenagers believe it's important to wear designer labels. If you want to follow the crowd, you need to wear trendy labels. Teenagers in Britain wear fashionable trainers and the more expensive, the better.",
+                        translation: "Thiếu niên Anh thi GCSE ở tuổi 16 học từ 5-10 môn, làm bài tập về nhà 2-3 tiếng. Lên 15-16 tuổi họ chán mặc đồng phục, phân biệt đồng phục gây bè phái bắt nạt nhau ở London. 40% chuộng mặc đồ hiệu chạy theo xu hướng mốt."
+                    }
+                ],
+                glossary: [
+                    { word: "Convenience", pos: "n", meaning: "Sự tiện lợi, thuận tay hữu dụng", synonym: "Handiness" },
+                    { word: "Highlight", pos: "v", meaning: "Làm nổi bật rõ rệt, nhấn mạnh", synonym: "Emphasize" },
+                    { word: "Trendy", pos: "adj", meaning: "Thời thượng, chạy theo mốt thời trang", synonym: "Fashionable" }
+                ],
+                questions: [
+                    { id: "e18a-1", index: "1", text: "❶ Robert lives in __________ on the twelfth floor in a building.", type: "mcq", options: ["a house", "an apartment", "detached house", "stilt house"], correct: "an apartment", explanation: "Dẫn chứng ngay dòng đầu: 'I live in an apartment. My apartment is on the twelfth floor.'", targetPara: "t5-p1" },
+                    { id: "e18a-2", index: "2", text: "❶ The supermarket is on the __________ floor in the building.", type: "mcq", options: ["first", "second", "third", "fourth"], correct: "first", explanation: "Dẫn chứng câu 3: 'There is a supermarket on the first floor in our building.'", targetPara: "t5-p1" },
+                    { id: "e18a-3", index: "3", text: "❶ Robert sometimes buys some __________ for breakfast when he goes to school.", type: "mcq", options: ["bread and orange juice", "banana and milk", "bread and eggs", "bread and milk"], correct: "bread and milk", explanation: "Dẫn chứng văn bản: 'Sometimes, I buy some bread and milk for breakfast when I go to school.'", targetPara: "t5-p1" },
+                    { id: "e18a-4", index: "4", text: "❶ He often plays soccer with __________ in the park near the building.", type: "mcq", options: ["his brother", "his sister", "his friends", "his father"], correct: "his friends", explanation: "Dẫn chứng: 'I often play soccer with my friends in the park to improve our health.'", targetPara: "t5-p1" },
+                    { id: "e18a-5", index: "5", text: "❶ There is also a __________ and a cinema in his neighbourhood.", type: "mcq", options: ["post office", "tower", "zoo", "restaurant"], correct: "restaurant", explanation: "Dẫn chứng: 'There is also a big restaurant with plenty of delicious dishes in my neighbourhood...'", targetPara: "t5-p1" },
+                    { id: "e18b-1", index: "6", text: "❷ Most students in Britain take the GCSE when__________", type: "mcq", options: ["they are 11 years old", "they are 16 years old", "they finish grade 10", "they begin grade 11"], correct: "they are 16 years old", explanation: "Dẫn chứng mục School: 'Students in Britain can leave school at sixteen (grade 11). This is also the age when most students take their first important exams, the GCSE.'", targetPara: "t5-p2" },
+                    { id: "e18b-2", index: "7", text: "❷ What is the first thing you’ll notice when you visit almost any school in Britain?", type: "mcq", options: ["the school logo", "the school gate", "the school playground", "the school uniform"], correct: "the school uniform", explanation: "Dẫn chứng mục School uniform câu đầu: 'Visit almost any school in Britain and the first thing you’ll notice is the school uniform.'", targetPara: "t5-p2" },
+                    { id: "e18b-3", index: "8", text: "❷ What do most teenagers in Britain prefer to wear?", type: "mcq", options: ["trendy labels", "expensive uniforms", "fashionable hats", "economical trainers"], correct: "trendy labels", explanation: "Dẫn chứng phần cuối bài đọc: 'If you want to follow the crowd, you need to wear trendy labels.'", targetPara: "t5-p2" },
+                    { id: "e18b-4", index: "9", text: "❷ The word ‘highlight’ in paragraph 2 is closest in meaning to__________", type: "mcq", options: ["confuse", "remark", "emphasize", "decrease"], correct: "emphasize", explanation: "Highlight có nghĩa là làm nổi bật, nhấn mạnh tôn vinh lên = emphasize.", targetPara: "t5-p2" },
+                    { id: "e18b-5", index: "10", text: "❷ According to the passage, which of the following statements is NOT true?", type: "mcq", options: ["Students in Britain can take 8 subjects at the GCSE.", "Most British teenagers spend 2-3 hours watching TV after school.", "Most 16-year-old students in Britain don’t like school uniforms.", "Many British teenagers judge their friends by their shirt or trainers."], correct: "Most British teenagers spend 2-3 hours watching TV after school.", explanation: "Sai vì bài đọc viết: 'Forget watching TV, teenagers in Britain now spend 2-3 hours on homework' - họ làm bài tập chứ không xem TV giải trí.", targetPara: "t5-p2" }
+                ]
+            },
+            6: {
+                title: "🎪 Exercise 19 & 20: Juggling Life Circus, Mary & James Case Study",
+                heading: "Exercise 19 True/False & Exercise 20 Text Completed Phrases",
+                paragraphs: [
+                    {
+                        id: "t6-p1",
+                        text: "<b>Mary & James Case Study Layout:</b> Balance is key for Mary, a busy teenager. She uses an app to stay organized with her assignments and deadlines; the app helps her receive reminders to ensure she doesn’t forget anything. Mary also makes a daily to-do list to help her stay focused and motivated. She’s mindful of not spending too much time on online social media, limiting her usage to an hour each day to avoid wasting her time. On weekends, Mary enjoys relaxing and socializing with friends, going to the cinema, shopping, or just hanging out. She also does some volunteer work at a local charity, which provides valuable academic experience and looks great on her CV.<br>James, an adult working a nine-to-five job, is also aware of the importance of time management. He starts his day by making a to-do list, prioritizing the most urgent or difficult tasks first when he has the most energy. To avoid distractions, James turns off email and social media notifications on his phone and closes his office door, allowing him to concentrate. On the day when he must work overtime, he quickly rearranges his tasks and makes sure everything gets completed on time. When at home, James spends his quality time with his family, playing games or going to the park with his two young children. James and his wife share the housework, taking turns cooking and cleaning, ensuring a great work-life balance. In his free time, James keeps fit by playing football with friends and going to the gym, which helps him relax and clear his mind.",
+                        translation: "Mary dùng ứng dụng di động để nhắc lịch học bài, lập việc cần làm và giới hạn mạng xã hội một tiếng một ngày. Người lớn James đi làm hành chính lập to-do list việc khó làm trước, tắt hết thông báo điện thoại tập trung, chia sẻ việc nhà với vợ cơm nước dọn dẹp giữ gìn thể chất đi tập gym."
+                    }
+                ],
+                glossary: [
+                    { word: "Mindful", pos: "adj", meaning: "Lưu tâm, lưu ý chú trọng", synonym: "Aware" },
+                    { word: "Distractions", pos: "n", meaning: "Sự gây xao nhãng xáo trộn", synonym: "Interruptions" },
+                    { word: "Overtime", pos: "adv/n", meaning: "Giờ làm việc tăng ca thêm", synonym: "Extra hours" }
+                ],
+                questions: [
+                    { id: "e19-1", index: "1", text: "Mary Case T/F 1: Mary has a friend to remind her of the assignments and deadlines.", type: "tfng", options: [], correct: "FALSE", explanation: "Sai vì Mary dùng ứng dụng app trên điện thoại gửi nhắc nhở tự động chứ không phải có người bạn nhắc bài.", targetPara: "t6-p1" },
+                    { id: "e19-2", index: "2", text: "Mary Case T/F 2: Mary often spends excessive time on online social media.", type: "tfng", options: [], correct: "FALSE", explanation: "Sai vì Mary giới hạn thời gian lướt mạng xã hội nghiêm khắc chỉ 1 tiếng/ngày ('limiting her usage to an hour each day').", targetPara: "t6-p1" },
+                    { id: "e19-3", index: "3", text: "Mary Case T/F 3: Mary spends all her free time volunteering at a local charity.", type: "tfng", options: [], correct: "FALSE", explanation: "Sai vì cô ấy còn dành thời gian đi chơi phố, đi mua sắm, xem phim giải trí cùng bạn bè ngày cuối tuần.", targetPara: "t6-p1" },
+                    { id: "e19-4", index: "4", text: "James Case T/F 4: On the day James works overtime, he can’t finish all the tasks on time.", type: "tfng", options: [], correct: "FALSE", explanation: "Sai vì văn bản ghi rõ vào ngày tăng ca anh ấy nhanh chóng sắp xếp lại lịch để bảo đảm xong đúng hạn ('makes sure everything gets completed on time').", targetPara: "t6-p1" },
+                    { id: "e19-5", index: "5", text: "James Case T/F 5: James and his wife divide their housework.", type: "tfng", options: [], correct: "TRUE", explanation: "Đúng, dẫn chứng ghi hai vợ chồng chia sẻ việc nhà thay phiên nhau nấu ăn dọn dẹp ('share the housework, taking turns cooking and cleaning').", targetPara: "t6-p1" },
+                    { id: "e19-6", index: "6", text: "James Case T/F 6: Going to the gym helps James keep fit and relax.", type: "tfng", options: [], correct: "TRUE", explanation: "Đúng, dòng cuối văn bản khẳng định tập gym giúp giữ dáng vóc và thư giãn giải tỏa thanh lọc tâm trí.", targetPara: "t6-p1" },
+                    { id: "e19b-1", index: "7", text: "Grid Matching 1: Who volunteers to gain more experience?", type: "matching", options: ["Mary", "James", "Both"], correct: "Mary", explanation: "Dẫn chứng đoạn Mary: 'She also does some volunteer work at a local charity, which provides valuable academic experience'.", targetPara: "t6-p1" },
+                    { id: "e19b-2", index: "8", text: "Grid Matching 2: Who creates a to-do list to plan their day?", type: "matching", options: ["Mary", "James", "Both"], correct: "Both", explanation: "Cả hai đều áp dụng: Mary làm 'daily to-do list', James mở đầu ngày mới bằng cách 'making a to-do list'.", targetPara: "t6-p1" }
+                ]
+            }
+        };
+
+        let state = {
+            currentTab: 1,
+            timeLeft: 1800, 
+            isTimerActive: false,
+            timerClockObj: null,
+            answersRecorded: {}
+        };
+
+        // AUDIO SOUND ENGINE SYNTHESIZER
+        function playSoundToneNode(isCorrect) {
+            try {
+                const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+                if(!AudioCtxClass) return;
+                const ctx = new AudioCtxClass();
+                const now = ctx.currentTime;
+                if(isCorrect) {
+                    [523.25, 659.25, 783.99].forEach((f, i) => {
+                        const osc = ctx.createOscillator(); const g = ctx.createGain();
+                        osc.type = 'sine'; osc.frequency.setValueAtTime(f, now + i*0.06);
+                        g.gain.setValueAtTime(0.12, now + i*0.06); g.gain.exponentialRampToValueAtTime(0.001, now + i*0.06 + 0.18);
+                        osc.connect(g); g.connect(ctx.destination); osc.start(now + i*0.06); osc.stop(now + i*0.06 + 0.22);
+                    });
+                } else {
+                    [150.00, 100.00].forEach((f, i) => {
+                        const osc = ctx.createOscillator(); const g = ctx.createGain();
+                        osc.type = 'triangle'; osc.frequency.setValueAtTime(f, now + i*0.1);
+                        g.gain.setValueAtTime(0.08, now + i*0.1); g.gain.exponentialRampToValueAtTime(0.001, now + i*0.1 + 0.25);
+                        osc.connect(g); g.connect(ctx.destination); osc.start(now + i*0.1); osc.stop(now + i*0.1 + 0.3);
+                    });
+                }
+            } catch(e){}
+        }
+
+        function triggerConfettiBurst() {
+            const canvas = document.getElementById('canvas-fireworks');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            let pool = [];
+            for(let i=0; i<80; i++) {
+                pool.push({
+                    x: Math.random()*canvas.width, y: Math.random()*canvas.height - canvas.height,
+                    r: Math.random()*4+4, d: Math.random()*canvas.height,
+                    color: `hsl(${Math.random()*360}, 100%, 75%)`,
+                    tilt: Math.random()*8-4, tiltAngleIncremental: Math.random()*0.05+0.02, tiltAngle:0
+                });
+            }
+            function loop() {
+                ctx.clearRect(0,0,canvas.width,canvas.height);
+                let alive = 0;
+                pool.forEach((p, idx) => {
+                    p.tiltAngle += p.tiltAngleIncremental; p.y += (Math.cos(p.d)+3)/2; p.x += Math.sin(p.tiltAngle);
+                    if(p.y < canvas.height) {
+                        alive++; ctx.beginPath(); ctx.lineWidth = p.r; ctx.strokeStyle = p.color;
+                        ctx.moveTo(p.x+p.tilt+p.r/2, p.y); ctx.lineTo(p.x+p.tilt, p.y+p.tilt+p.r/2); ctx.stroke();
+                    }
+                });
+                if(alive > 0) requestAnimationFrame(loop);
+            }
+            loop();
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            activateDashboardTab(1);
+            document.getElementById('btn-timer-trigger').addEventListener('click', controlTimerFlow);
+            document.getElementById('btn-submit-exam-trigger').addEventListener('click', calculateFinalGradesScoreboard);
+        });
+
+        function activateDashboardTab(idx) {
+            state.currentTab = idx;
+            for(let i=1; i<=6; i++) {
+                const node = document.getElementById(`tab-anchor-${i}`);
+                if(!node) continue;
+                if(i === idx) {
+                    node.className = "whitespace-nowrap px-4 py-2 rounded-xl font-black text-xs transition-all flex items-center gap-1.5 border-2 bg-purple-600 text-white border-purple-700 shadow-sm";
+                } else {
+                    node.className = "whitespace-nowrap px-4 py-2 rounded-xl font-black text-xs transition-all flex items-center gap-1.5 border-2 bg-white text-gray-600 border-gray-200 hover:bg-gray-50";
+                }
+            }
+            renderLeftPane();
+            renderRightPane();
+            refreshProgressGauges();
+        }
+
+        function renderLeftPane() {
+            const data = masterExamDataset[state.currentTab];
+            document.getElementById('lbl-passage-master-title').innerHTML = `<i class="fa-solid fa-book-bookmark text-purple-600"></i> ${data.title}`;
+            const container = document.getElementById('viewport-left-paragraphs');
+            container.innerHTML = '';
+
+            const wrapper = document.createElement('div');
+            wrapper.className = "bg-white border border-gray-200 rounded-2xl p-4 space-y-4 shadow-sm";
+            wrapper.innerHTML = `<h3 class="text-xs font-black uppercase bg-purple-50 text-purple-700 px-2.5 py-1 rounded-md inline-block">${data.heading}</h3>`;
+
+            data.paragraphs.forEach(p => {
+                const block = document.createElement('div');
+                block.id = p.id; block.className = "p-2 rounded-xl transition-all duration-300";
+                block.innerHTML = `
+                    <p class="text-[15px] font-medium text-gray-800 leading-relaxed select-text">${p.text}</p>
+                    <button onclick="document.getElementById('trans-block-${p.id}').classList.toggle('hidden')" class="mt-2 text-pink-600 bg-pink-50/50 hover:bg-pink-50 border border-pink-200 font-black px-3 py-1 rounded-xl text-[11px] btn-3d">BẢN DỊCH TIẾNG VIỆT 🌟</button>
+                    <div id="trans-block-${p.id}" class="hidden mt-2 bg-purple-50/30 border-l-4 border-purple-400 p-3 rounded-r-xl text-xs font-bold text-gray-700 select-text leading-relaxed">${p.translation}</div>
+                `;
+                wrapper.appendChild(block);
+            });
+            container.appendChild(wrapper);
+
+            const tableBlock = document.createElement('div');
+            tableBlock.className = "bg-white border border-gray-200 rounded-2xl p-4 shadow-sm mt-4";
+            tableBlock.innerHTML = `
+                <h4 class="text-xs font-black uppercase text-purple-700 tracking-wider mb-2 flex items-center gap-1.5">🌸 Master Vocabulary Glossary</h4>
+                <div class="overflow-x-auto rounded-xl border border-gray-200">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-gradient-to-r from-pink-400 to-purple-500 text-white font-black">
+                            <tr><th class="p-2">Academic Word</th><th class="p-2">Type</th><th class="p-2">Nghĩa & Từ đồng nghĩa</th></tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 bg-white font-bold text-gray-600">
+                            ${data.glossary.map(g => `<tr class="hover:bg-gray-50"><td class="p-2 text-purple-700 font-black">${g.word}</td><td class="p-2"><span class="bg-gray-100 text-gray-400 text-[9px] px-1.5 rounded">${g.pos}</span></td><td class="p-2 text-gray-700">${g.meaning} <span class="block text-[10px] text-pink-400 italic">(= ${g.synonym})</span></td></tr>`).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            container.appendChild(tableBlock);
+        }
+
+        function renderRightPane() {
+            const list = masterExamDataset[state.currentTab].questions;
+            const container = document.getElementById('viewport-right-questions');
+            container.innerHTML = '';
+
+            list.forEach(q => {
+                const card = document.createElement('div');
+                card.id = `card-node-id-${q.id}`;
+                card.className = "bg-white border border-purple-200 rounded-2xl p-4 space-y-3 relative";
+                card.innerHTML = `<span class="bg-purple-600 text-white font-black text-[10px] uppercase px-2 py-0.5 rounded-full inline-block">Câu ${q.index}</span><p class="text-sm font-black text-gray-800 select-text">${q.text}</p>`;
+
+                const actionBox = document.createElement('div');
+                actionBox.className = "space-y-2 pt-1";
+
+                if(q.type === 'mcq') {
+                    q.options.forEach(opt => {
+                        const btn = document.createElement('button');
+                        btn.className = "w-full text-left bg-white hover:bg-gray-50 font-bold p-3 rounded-xl border border-gray-200 text-xs flex items-center justify-between shadow-xs btn-3d";
+                        btn.innerHTML = `<span>${opt}</span>`;
+                        btn.onclick = () => saveResponseState(q.id, opt);
+                        actionBox.appendChild(btn);
+                    });
+                } 
+                else if(q.type === 'tfng') {
+                    const row = document.createElement('div'); row.className = "flex gap-2";
+                    ["TRUE", "FALSE", "NOT GIVEN"].forEach(v => {
+                        const btn = document.createElement('button');
+                        btn.className = "flex-1 bg-white hover:bg-gray-50 text-gray-700 font-black py-2 rounded-xl border border-gray-200 text-xs shadow-xs btn-3d";
+                        btn.textContent = v; btn.onclick = () => saveResponseState(q.id, v);
+                        row.appendChild(btn);
+                    });
+                    actionBox.appendChild(row);
+                }
+                else if(q.type === 'matching') {
+                    const row = document.createElement('div'); row.className = "flex gap-2 flex-wrap";
+                    q.options.forEach(o => {
+                        const btn = document.createElement('button');
+                        btn.className = "bg-white hover:bg-gray-50 text-purple-950 font-black px-4 py-2 rounded-xl border border-gray-200 text-xs btn-3d";
+                        btn.textContent = o; btn.onclick = () => saveResponseState(q.id, o);
+                        row.appendChild(btn);
+                    });
+                    actionBox.appendChild(row);
+                }
+
+                card.appendChild(actionBox);
+
+                const expl = document.createElement('div');
+                expl.id = `expl-card-box-${q.id}`;
+                expl.className = "hidden bg-[#FFFDF0] border border-[#F1C40F] p-3 rounded-xl text-xs text-gray-700 font-bold space-y-1 select-text shadow-inner";
+                card.appendChild(expl);
+
+                container.appendChild(card);
+                if(state.answersRecorded[q.id]) rebuildCardStateUI(q.id);
+            });
+        }
+
+        function saveResponseState(qId, val) {
+            const q = locateMeta(qId);
+            const status = val === q.correct;
+            state.answersRecorded[qId] = { selected: val, isCorrect: status };
+            playSoundToneNode(status);
+            if(status) triggerConfettiBurst();
+            rebuildCardStateUI(qId);
+            refreshProgressGauges();
+        }
+
+        function rebuildCardStateUI(qId) {
+            const q = locateMeta(qId);
+            const user = state.answersRecorded[qId];
+            const card = document.getElementById(`card-node-id-${qId}`);
+            if(!card) return;
+
+            const box = document.getElementById(`expl-card-box-${qId}`);
+            box.innerHTML = `
+                <div class="text-amber-800 font-black">1. ĐÁP ÁN: <span class="text-purple-700 font-black uppercase">${q.correct}</span></div>
+                <div class="text-gray-700 font-bold">2. GIẢI THÍCH: ${q.explanation}</div>
+                <button onclick="scrollLeftToEvidence('${q.targetPara}')" class="mt-1.5 bg-blue-50 border border-blue-200 text-blue-700 font-black px-2.5 py-1 rounded-lg text-[10px] flex items-center gap-1 shadow-xs">📍 Vị trí dẫn chứng</button>
+            `;
+            box.classList.remove('hidden');
+
+            if(q.type === 'mcq') {
+                card.querySelectorAll('button').forEach(btn => {
+                    btn.disabled = true;
+                    const txt = btn.querySelector('span') ? btn.querySelector('span').textContent.trim() : btn.textContent.trim();
+                    if(txt === q.correct) btn.className = "w-full text-left bg-[#E6F9F0] text-gray-900 font-black p-3 rounded-xl border-2 border-[#00D26A] text-xs flex items-center justify-between";
+                    else if(txt === user.selected) btn.className = "w-full text-left bg-[#FFEAEA] text-gray-900 font-black p-3 rounded-xl border-2 border-red-500 text-xs flex items-center justify-between";
+                    else btn.className = "w-full text-left bg-gray-50 text-gray-400 font-medium p-3 rounded-xl border border-gray-100 text-xs opacity-50 cursor-not-allowed";
+                });
+            } else {
+                card.querySelectorAll('button').forEach(btn => {
+                    btn.disabled = true; const txt = btn.textContent.trim();
+                    if(txt === q.correct) btn.className = "bg-[#00D26A] text-white font-black px-4 py-2 rounded-xl border text-xs";
+                    else if(txt === user.selected) btn.className = "bg-red-500 text-white font-black px-4 py-2 rounded-xl border text-xs";
+                    else btn.className = "bg-gray-100 text-gray-400 font-medium px-4 py-2 rounded-xl border text-xs opacity-40";
+                });
+            }
+        }
+
+        function locateMeta(id) {
+            for(let key in masterExamDataset) {
+                const m = masterExamDataset[key].questions.find(item => item.id === id);
+                if(m) return m;
+            }
+            return null;
+        }
+
+        function refreshProgressGauges() {
+            const list = masterExamDataset[state.currentTab].questions;
+            let counter = 0;
+            list.forEach(q => { if(state.answersRecorded[q.id]) counter++; });
+            const ratio = list.length > 0 ? Math.round((counter / list.length)*100) : 0;
+            document.getElementById('lbl-tab-completion-ratio').textContent = `Progress: ${ratio}%`;
+
+            let score = 0;
+            for(let k in state.answersRecorded) { if(state.answersRecorded[k].isCorrect) score++; }
+            document.getElementById('lbl-master-score-badge').textContent = score;
+        }
+
+        function scrollLeftToEvidence(pId) {
+            const target = document.getElementById(pId);
+            if(target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                target.classList.add('flash-target-evidence');
+                setTimeout(() => target.classList.remove('flash-target-evidence'), 3500);
+            }
+        }
+
+        function controlTimerFlow() {
+            const btn = document.getElementById('btn-timer-trigger');
+            if(state.isTimerActive) {
+                clearInterval(state.timerClockObj); state.isTimerActive = false;
+                btn.textContent = "TIẾP TỤC LÀM BÀI";
+            } else {
+                state.isTimerActive = true; btn.textContent = "TẠM DỪNG";
+                state.timerClockObj = setInterval(() => {
+                    state.timeLeft--;
+                    const m = Math.floor(state.timeLeft / 60); const s = state.timeLeft % 60;
+                    document.getElementById('lbl-countdown-string').textContent = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+                    if(state.timeLeft <= 0) {
+                        clearInterval(state.timerClockObj); state.isTimerActive = false;
+                        alert("Time's up!");
+                    }
+                }, 1000);
+            }
+        }
+
+        function calculateFinalGradesScoreboard() {
+            let pts = 0; const total = 52; 
+            for(let id in state.answersRecorded) { if(state.answersRecorded[id].isCorrect) pts++; }
+            document.getElementById('lbl-modal-score-ratio').textContent = `${pts} / ${total}`;
+            document.getElementById('lbl-modal-feedback-string').textContent = pts >= 40 ? "XUẤT SẮC! Kỹ năng đọc hiểu siêu phàm chuẩn band cao!" : "Khá tốt! Hãy rà soát kỹ phần giải thích màu vàng của cô để lấy thêm từ vựng nhé.";
+            toggleModalVisibilityState(true);
+        }
+
+        function toggleModalVisibilityState(show) {
+            const m = document.getElementById('modal-evaluator-desk');
+            if(show) m.classList.remove('hidden'); else m.classList.add('hidden');
+        }
+
+        function clearAndResetMockExam() {
+            state.answersRecorded = {}; state.timeLeft = 1800; state.isTimerActive = false;
+            if(state.timerClockObj) clearInterval(state.timerClockObj);
+            document.getElementById('lbl-countdown-string').textContent = "30:00";
+            document.getElementById('btn-timer-trigger').textContent = "BẮT ĐẦU TÍNH GIỜ LÀM BÀI";
+            toggleModalVisibilityState(false); activateDashboardTab(1);
+        }
+    </script>
+</body>
+</html>
